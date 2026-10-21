@@ -18,48 +18,33 @@ export default function Home() {
   const [isReelModalOpen, setIsReelModalOpen] = useState(false);
 
   return (
-    <main className="min-h-screen bg-[#08090C] text-[#F3F4F6] selection:bg-[#38BDF8]/30 selection:text-white">
-      {/* Sticky Navigation Bar */}
+    <>
       <Navbar onRequestAccess={() => setIsAccessModalOpen(true)} />
 
-      {/* Hero Section with Interactive 2.5D Parallax Viewport */}
-      <HeroSection
-        onRequestAccess={() => setIsAccessModalOpen(true)}
-        onWatchReel={() => setIsReelModalOpen(true)}
-      />
+      <main>
+        <HeroSection
+          onRequestAccess={() => setIsAccessModalOpen(true)}
+          onWatchReel={() => setIsReelModalOpen(true)}
+        />
+        <StatsStrip />
+        <ArchitectureBento />
+        <GpuComputeMatrix />
+        <InteractiveShowcase />
+        <EconomicsBenchmark />
+        <EngineeringTeam />
+      </main>
 
-      {/* High-Impact GPU & Continuous Generation Stats Strip */}
-      <StatsStrip />
-
-      {/* The 4-Stage Autonomous Engine Bento Grid */}
-      <ArchitectureBento />
-
-      {/* GPU Compute & Acceleration Matrix for NVIDIA Inception */}
-      <GpuComputeMatrix />
-
-      {/* Interactive 3-Step Multi-Modal CV Showcase */}
-      <InteractiveShowcase />
-
-      {/* Production Unit Economics & Studio ROI Calculator */}
-      <EconomicsBenchmark />
-
-      {/* Verified Engineering Leadership & Scientific Advisory Board */}
-      <EngineeringTeam />
-
-      {/* Corporate Compliance & Transparency Footer */}
       <Footer />
 
-      {/* Studio / Enterprise Request Access Modal */}
       <RequestAccessModal
         isOpen={isAccessModalOpen}
         onClose={() => setIsAccessModalOpen(false)}
       />
-
-      {/* 4K Cinematic Master Reel Modal */}
       <ReelModal
         isOpen={isReelModalOpen}
         onClose={() => setIsReelModalOpen(false)}
+        onRequestAccess={() => setIsAccessModalOpen(true)}
       />
-    </main>
+    </>
   );
 }
