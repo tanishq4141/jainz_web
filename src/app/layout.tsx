@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Geist, Geist_Mono, Instrument_Serif } from "next/font/google";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -12,37 +12,40 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
+const instrumentSerif = Instrument_Serif({
+  variable: "--font-instrument-serif",
+  subsets: ["latin"],
+  weight: "400",
+  style: ["normal", "italic"],
+});
+
 export const metadata: Metadata = {
-  title: "CineAgent AI | Autonomous Generative Cinema & Motion Comics",
+  metadataBase: new URL("https://cineagent.ai"),
+  title: "CineAgent — Generative cinema engine",
   description:
-    "Autonomous generative cinema system transforming 20-line concepts into 3-hour feature-length motion comics. Distributed multi-agent engine powered by NVIDIA GPU clusters, FLUX.1 identity locks, and 2.5D parallax compositing.",
+    "CineAgent turns a short story premise into a feature-length motion comic. A multi-agent pipeline for writing, illustration, voice and 2.5D compositing, running on NVIDIA GPU infrastructure.",
   keywords: [
     "CineAgent",
-    "Generative Cinema",
-    "Autonomous Motion Comics",
-    "NVIDIA Inception",
-    "FLUX.1",
-    "PuLID",
-    "WhisperX",
-    "CUDA Acceleration",
-    "Depth Anything 3",
-    "SAM 2",
-    "Remotion Compositing",
+    "generative cinema",
+    "motion comics",
+    "AI animation",
+    "2.5D parallax",
+    "character consistency",
   ],
   authors: [{ name: "CineAgent Technologies, Inc." }],
   openGraph: {
-    title: "CineAgent AI | Autonomous Generative Cinema System",
+    title: "CineAgent — Generative cinema engine",
     description:
-      "Transform 20-line concepts into 3-hour motion comics with zero-shot facial consistency and sub-millisecond audio alignment on distributed NVIDIA GPUs.",
+      "Feature-length motion comics from a twenty-line premise, with consistent characters across every panel.",
     type: "website",
     locale: "en_US",
-    siteName: "CineAgent AI",
+    siteName: "CineAgent",
   },
   twitter: {
     card: "summary_large_image",
-    title: "CineAgent AI — Deep-Tech Generative Cinema",
+    title: "CineAgent — Generative cinema engine",
     description:
-      "Autonomous 3-hour motion comics generated via distributed NVIDIA RTX 4090/A100 clusters.",
+      "Feature-length motion comics from a twenty-line premise, with consistent characters across every panel.",
   },
 };
 
@@ -52,9 +55,9 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className="dark">
+    <html lang="en">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} min-h-screen bg-[#08090C] text-[#F3F4F6] antialiased selection:bg-[#38BDF8]/30 selection:text-white`}
+        className={`${geistSans.variable} ${geistMono.variable} ${instrumentSerif.variable} min-h-screen bg-ink font-sans text-fg antialiased`}
       >
         {children}
       </body>

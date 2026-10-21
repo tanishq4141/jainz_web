@@ -1,256 +1,180 @@
 "use client";
 
-import React, { useState } from "react";
-import {
-  X,
-  Sparkles,
-  ShieldCheck,
-  Cpu,
-  Key,
-  CheckCircle2,
-  ArrowRight,
-  Copy,
-  Check,
-} from "lucide-react";
+import React, { useEffect, useState } from "react";
+import { X } from "lucide-react";
 
 interface RequestAccessModalProps {
   isOpen: boolean;
   onClose: () => void;
 }
 
+const CONTACT_EMAIL = "contact@cineagent.ai";
+
+const inputClass =
+  "w-full rounded-lg border border-line bg-ink px-3.5 py-2.5 text-[14px] text-fg placeholder:text-subtle focus:border-muted focus:outline-none";
+
 export const RequestAccessModal: React.FC<RequestAccessModalProps> = ({
   isOpen,
   onClose,
 }) => {
   const [submitted, setSubmitted] = useState(false);
-  const [copiedKey, setCopiedKey] = useState(false);
   const [formData, setFormData] = useState({
-    studioName: "",
-    workEmail: "",
-    role: "Producer / Studio Head",
-    format: "3-Hour Feature Film (180 Min)",
-    computeTier: "Hosted CineAgent NVIDIA Cloud (A100/4090)",
+    name: "",
+    studio: "",
+    email: "",
+    role: "Producer / Studio head",
+    format: "Feature (90–180 min)",
     logline: "",
   });
 
+  useEffect(() => {
+    if (!isOpen) return;
+    const onKey = (e: KeyboardEvent) => e.key === "Escape" && onClose();
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [isOpen, onClose]);
+
   if (!isOpen) return null;
 
+  const update =
+    (field: keyof typeof formData) =>
+    (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) =>
+      setFormData({ ...formData, [field]: e.target.value });
+
+  // There is no backend yet, so the request is handed to the visitor's
+  // email client, addressed to the company inbox.
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    const subject = `Studio access request: ${formData.studio}`;
+    const body = [
+      `Name: ${formData.name}`,
+      `Studio: ${formData.studio}`,
+      `Email: ${formData.email}`,
+      `Role: ${formData.role}`,
+      `Format: ${formData.format}`,
+      ...(formData.logline ? ["", `Project: ${formData.logline}`] : []),
+    ].join("\n");
+    window.location.href = `mailto:${CONTACT_EMAIL}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
     setSubmitted(true);
   };
 
-  const dummyApiKey = "cine_preview_sec9_4a8f902b7cd1e5a8";
-
-  const handleCopyKey = () => {
-    navigator.clipboard.writeText(dummyApiKey);
-    setCopiedKey(true);
-    setTimeout(() => setCopiedKey(false), 2000);
+  const handleClose = () => {
+    setSubmitted(false);
+    onClose();
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 overflow-y-auto">
-      {/* Backdrop */}
-      <div
-        onClick={onClose}
-        className="fixed inset-0 bg-black/80 backdrop-blur-sm transition-opacity"
-      />
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto p-4 sm:p-6"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="access-title"
+    >
+      <div onClick={handleClose} className="fixed inset-0 bg-black/75 backdrop-blur-sm" />
 
-      {/* Modal Card */}
-      <div className="relative w-full max-w-xl rounded-2xl border border-zinc-800 bg-[#0d0f14] p-6 sm:p-8 shadow-2xl shadow-cyan-950/40 z-10">
-        {/* Close Button */}
+      <div className="relative z-10 w-full max-w-lg rounded-2xl border border-line bg-surface p-6 sm:p-8">
         <button
-          onClick={onClose}
-          className="absolute top-5 right-5 rounded-lg p-1.5 text-zinc-400 hover:text-white hover:bg-zinc-800 transition-colors"
+          onClick={handleClose}
+          aria-label="Close"
+          className="absolute right-4 top-4 rounded-full p-1.5 text-muted transition-colors hover:bg-raised hover:text-fg"
         >
           <X className="h-5 w-5" />
         </button>
 
         {!submitted ? (
-          <div>
-            {/* Modal Header */}
-            <div className="flex items-center gap-2">
-              <div className="p-2 rounded-lg bg-cyan-950/60 border border-cyan-500/40 text-cyan-400">
-                <Cpu className="h-5 w-5" />
-              </div>
-              <span className="text-xs font-mono uppercase tracking-wider text-cyan-400">
-                Early Studio Access Program
-              </span>
-            </div>
-
-            <h3 className="mt-3 text-2xl font-bold tracking-tight text-white">
-              Request CineAgent Platform Access
+          <>
+            <h3 id="access-title" className="font-display text-3xl tracking-[-0.01em] text-fg">
+              Request studio access
             </h3>
-            <p className="mt-1 text-xs text-zinc-400 font-sans">
-              Enter your studio credentials to access the private SDK, headless
-              ComfyUI API workers, and dedicated NVIDIA GPU clusters.
+            <p className="mt-2 text-[14px] leading-relaxed text-muted">
+              We are onboarding a small number of studios. Tell us about your
+              project and a founder will reply within two business days.
             </p>
 
-            {/* Form */}
-            <form onSubmit={handleSubmit} className="mt-6 space-y-4">
-              <div>
-                <label className="block text-xs font-mono text-zinc-300 mb-1">
-                  Studio / Organization Name *
+            <form onSubmit={handleSubmit} className="mt-7 space-y-4">
+              <div className="grid gap-4 sm:grid-cols-2">
+                <label className="block">
+                  <span className="mb-1.5 block text-[13px] text-muted">Name</span>
+                  <input required value={formData.name} onChange={update("name")} className={inputClass} />
                 </label>
-                <input
-                  type="text"
-                  required
-                  value={formData.studioName}
-                  onChange={(e) =>
-                    setFormData({ ...formData, studioName: e.target.value })
-                  }
-                  placeholder="e.g. Warner Animation, Cyberpunk Studios"
-                  className="w-full rounded-lg border border-zinc-800 bg-zinc-950 px-3.5 py-2.5 text-sm text-white placeholder-zinc-600 focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500"
-                />
+                <label className="block">
+                  <span className="mb-1.5 block text-[13px] text-muted">Studio or company</span>
+                  <input required value={formData.studio} onChange={update("studio")} className={inputClass} />
+                </label>
               </div>
 
-              <div>
-                <label className="block text-xs font-mono text-zinc-300 mb-1">
-                  Professional Work Email (Domain Verified) *
-                </label>
+              <label className="block">
+                <span className="mb-1.5 block text-[13px] text-muted">Work email</span>
                 <input
                   type="email"
                   required
-                  value={formData.workEmail}
-                  onChange={(e) =>
-                    setFormData({ ...formData, workEmail: e.target.value })
-                  }
-                  placeholder="director@yourstudio.com"
-                  className="w-full rounded-lg border border-zinc-800 bg-zinc-950 px-3.5 py-2.5 text-sm text-white placeholder-zinc-600 focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500"
+                  value={formData.email}
+                  onChange={update("email")}
+                  placeholder="you@studio.com"
+                  className={inputClass}
                 />
-              </div>
+              </label>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-xs font-mono text-zinc-300 mb-1">
-                    Your Role
-                  </label>
-                  <select
-                    value={formData.role}
-                    onChange={(e) =>
-                      setFormData({ ...formData, role: e.target.value })
-                    }
-                    className="w-full rounded-lg border border-zinc-800 bg-zinc-950 px-3.5 py-2.5 text-sm text-white focus:border-cyan-500 focus:outline-none"
-                  >
-                    <option>Producer / Studio Head</option>
+              <div className="grid gap-4 sm:grid-cols-2">
+                <label className="block">
+                  <span className="mb-1.5 block text-[13px] text-muted">Role</span>
+                  <select value={formData.role} onChange={update("role")} className={inputClass}>
+                    <option>Producer / Studio head</option>
                     <option>Showrunner / Director</option>
-                    <option>AI / VFX Pipeline Lead</option>
-                    <option>Venture Investor / Partner</option>
+                    <option>Pipeline / VFX lead</option>
+                    <option>Investor</option>
                   </select>
-                </div>
-
-                <div>
-                  <label className="block text-xs font-mono text-zinc-300 mb-1">
-                    Target Format
-                  </label>
-                  <select
-                    value={formData.format}
-                    onChange={(e) =>
-                      setFormData({ ...formData, format: e.target.value })
-                    }
-                    className="w-full rounded-lg border border-zinc-800 bg-zinc-950 px-3.5 py-2.5 text-sm text-white focus:border-cyan-500 focus:outline-none"
-                  >
-                    <option>3-Hour Feature Film (180 Min)</option>
-                    <option>Episodic Series (10x 22 Min)</option>
-                    <option>Graphic Novel IP Adaptation</option>
-                    <option>Short Film Proof-of-Concept</option>
+                </label>
+                <label className="block">
+                  <span className="mb-1.5 block text-[13px] text-muted">Format</span>
+                  <select value={formData.format} onChange={update("format")} className={inputClass}>
+                    <option>Feature (90–180 min)</option>
+                    <option>Episodic series</option>
+                    <option>Graphic novel adaptation</option>
+                    <option>Short / proof of concept</option>
                   </select>
-                </div>
+                </label>
               </div>
 
-              <div>
-                <label className="block text-xs font-mono text-zinc-300 mb-1">
-                  Compute Infrastructure Preference
-                </label>
-                <select
-                  value={formData.computeTier}
-                  onChange={(e) =>
-                    setFormData({ ...formData, computeTier: e.target.value })
-                  }
-                  className="w-full rounded-lg border border-zinc-800 bg-zinc-950 px-3.5 py-2.5 text-sm text-white focus:border-cyan-500 focus:outline-none"
-                >
-                  <option>Hosted CineAgent NVIDIA Cloud (RTX 4090 / A100)</option>
-                  <option>On-Premises Studio Cluster (Slurm / Kubernetes)</option>
-                  <option>Hybrid Burst Deployment</option>
-                </select>
-              </div>
-
-              <div>
-                <label className="block text-xs font-mono text-zinc-300 mb-1">
-                  Story Premise / Project Logline (Optional)
-                </label>
+              <label className="block">
+                <span className="mb-1.5 block text-[13px] text-muted">
+                  Project logline <span className="text-subtle">(optional)</span>
+                </span>
                 <textarea
-                  rows={2}
+                  rows={3}
                   value={formData.logline}
-                  onChange={(e) =>
-                    setFormData({ ...formData, logline: e.target.value })
-                  }
-                  placeholder="e.g. A rogue synthetic detective in 2094 uncovers a memory black market beneath Neo-Shinjuku..."
-                  className="w-full rounded-lg border border-zinc-800 bg-zinc-950 px-3.5 py-2 text-sm text-white placeholder-zinc-600 focus:border-cyan-500 focus:outline-none"
+                  onChange={update("logline")}
+                  className={inputClass}
                 />
-              </div>
+              </label>
 
-              <div className="pt-2">
-                <button
-                  type="submit"
-                  className="w-full rounded-xl bg-gradient-to-r from-cyan-400 to-blue-500 py-3 text-sm font-semibold uppercase tracking-wider text-slate-950 hover:from-cyan-300 hover:to-blue-400 transition-all shadow-lg shadow-cyan-950/50 flex items-center justify-center gap-2"
-                >
-                  <span>Submit Studio Access Request</span>
-                  <ArrowRight className="h-4 w-4" />
-                </button>
-              </div>
-
-              <div className="flex items-center justify-center gap-2 text-[11px] font-mono text-zinc-500 pt-1">
-                <ShieldCheck className="h-3.5 w-3.5 text-[#76B900]" />
-                <span>NDA Protected • Direct Founder Review within 24 Hours</span>
-              </div>
-            </form>
-          </div>
-        ) : (
-          <div className="text-center py-4">
-            <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-emerald-950/80 border border-emerald-500/40 text-[#76B900]">
-              <CheckCircle2 className="h-8 w-8" />
-            </div>
-
-            <h3 className="mt-4 text-2xl font-bold tracking-tight text-white">
-              Access Request Confirmed
-            </h3>
-            <p className="mt-2 text-sm text-zinc-400 max-w-md mx-auto">
-              Your studio priority application has been queued on Node A100-02.
-              Our engineering team has reserved your provisional SDK API token:
-            </p>
-
-            {/* Generated API Token */}
-            <div className="mt-5 rounded-xl border border-zinc-800 bg-zinc-950 p-4 text-left font-mono">
-              <div className="flex items-center justify-between text-xs text-zinc-500 mb-2">
-                <span>PROVISIONAL CINEAGENT SDK TOKEN:</span>
-                <span className="text-[#76B900] font-bold">STATUS: STAGED</span>
-              </div>
-              <div className="flex items-center justify-between bg-zinc-900/80 rounded-lg p-2.5 border border-zinc-800">
-                <code className="text-xs text-cyan-300 font-bold overflow-hidden text-ellipsis">
-                  {dummyApiKey}
-                </code>
-                <button
-                  onClick={handleCopyKey}
-                  className="p-1 text-zinc-400 hover:text-white transition-colors"
-                >
-                  {copiedKey ? (
-                    <Check className="h-4 w-4 text-emerald-400" />
-                  ) : (
-                    <Copy className="h-4 w-4" />
-                  )}
-                </button>
-              </div>
-            </div>
-
-            <div className="mt-6 flex flex-col gap-2">
               <button
-                onClick={onClose}
-                className="w-full rounded-xl bg-cyan-500 py-2.5 text-xs font-mono font-bold uppercase tracking-wider text-slate-950 hover:bg-cyan-400 transition-colors"
+                type="submit"
+                className="mt-2 h-11 w-full rounded-full bg-fg text-[15px] font-medium text-ink transition-colors hover:bg-white"
               >
-                Return To Architecture Overview
+                Send request
               </button>
-            </div>
+            </form>
+          </>
+        ) : (
+          <div className="py-4">
+            <h3 id="access-title" className="font-display text-3xl tracking-[-0.01em] text-fg">
+              Thank you.
+            </h3>
+            <p className="mt-3 text-[14px] leading-relaxed text-muted">
+              Your email app should have opened with the request ready to send.
+              If it didn&apos;t, write to us directly at{" "}
+              <a href={`mailto:${CONTACT_EMAIL}`} className="text-fg underline underline-offset-4">
+                {CONTACT_EMAIL}
+              </a>
+              .
+            </p>
+            <button
+              onClick={handleClose}
+              className="mt-8 h-11 rounded-full border border-line px-6 text-[14px] text-fg transition-colors hover:bg-raised"
+            >
+              Close
+            </button>
           </div>
         )}
       </div>
